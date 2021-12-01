@@ -10,4 +10,4 @@ function jsonArrayToTable(){
 }
 
 python ~/.local/bin/sYT.py -q "$query";
-cat ~/data.json | jsonArrayToTable |fzf --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "https://youtube.com{}"
+cat ~/.cache/data.json | jsonArrayToTable |fzf --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "https://youtube.com{}"
