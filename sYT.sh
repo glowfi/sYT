@@ -11,4 +11,4 @@ function jsonArrayToTable(){
 }
 
 python ~/.local/bin/sYT.py -q "$query";
-cat ~/.cache/data.json | jsonArrayToTable |fzf --cycle -i --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "https://youtube.com{}"
+cat ~/.cache/data.json | jsonArrayToTable |fzf --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "https://youtube.com{}"

@@ -50,7 +50,7 @@ class YoutubeSearch:
                     .get("text", None)
                 )
                 res["duration"] = video_data.get("lengthText", {}).get("simpleText", 0)
-                res["views"] = video_data.get("viewCountText", {}).get("simpleText", 0)
+                # res["views"] = video_data.get("viewCountText", {}).get("simpleText", 0)
                 res["publish_time"] = video_data.get("publishedTimeText", {}).get(
                     "simpleText", 0
                 )
