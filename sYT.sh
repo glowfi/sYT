@@ -1,8 +1,9 @@
 #!/bin/sh
 
-read -p "Search : " query
+read -p $'\e[31mSearch query\e[0m :' query
 echo "Scraping ......"
 echo ""
+echo "=== Showing results for $query ==="
 echo ""
 
 function jsonArrayToTable(){
