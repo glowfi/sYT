@@ -3,6 +3,8 @@
 read -p $'\e[31mSearch query\e[0m :' query
 echo "Scraping ......"
 echo ""
+sleep 1
+clear
 echo "=== Showing results for $query ==="
 echo ""
 
