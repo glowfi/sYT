@@ -32,7 +32,7 @@ class searchYouTube:
         en = response.index("};", st) + 1
         json_str = response[st:en]
 
-        # Convert the the above sliced string into json and select the contents part containing all the required data
+        # Convert the the above sliced string into json
         response = json.loads(json_str)
         videos = response["contents"]["twoColumnSearchResultsRenderer"][
             "primaryContents"
