@@ -79,10 +79,10 @@ class searchYouTube:
 
                 # Get total views from current video
                 # views = curr_video["shortViewCountText"]["simpleText"]
-                views = curr_video.get("shortViewCountText", "NA").get(
-                    "simpleText", "NA"
-                )
-                output["Views"] = views
+                # views = curr_video.get("shortViewCountText", "NA").get(
+                #     "simpleText", "NA"
+                # )
+                # output["Views"] = views
 
                 # Get upload date from current video
                 # upload_date = curr_video["publishedTimeText"]["simpleText"]
@@ -102,7 +102,7 @@ class searchYouTube:
                     .get("url", "NA")
                 )
                 # output["Link"] = "https://www.youtube.com" + url_
-                output["Link"] = url_
+                output["Link"] = "https://www.youtube.com" + url_
 
                 # Append current video to the final master list
                 final.append(output)
