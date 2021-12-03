@@ -27,8 +27,9 @@ function jsonArrayToTable(){
 if [[ "$1" ]]; then
 
     # Read user query
-    query=$(echo >2 |dmenu -p "Search query :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee")
+    query=$(echo >/dev/null |dmenu -p "Search query :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee")
 
+    # Get data
     if [[ "$query" ]]; then
     python ~/.local/bin/sYT.py -q "$query";
     cat ~/data.json | jsonArrayToTable |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}'|xargs -t -I {} mpv "{}"
@@ -42,9 +43,10 @@ else
     # Show progress 
     progress
 
+    # Get data
     python ~/.local/bin/sYT.py -q "$query";
     cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
 fi
 
-
+# Cleanup
 rm -rf ~/argparse ~/json ~/os ~/requests ~/urllib.parse ~/data.json
