@@ -102,7 +102,7 @@ class searchYouTube:
                 # ]["url"]
 
                 # output["Link"] = "https://www.youtube.com" + url_
-                output["Link"] = "https://www.youtube.com" + url_
+                output["url_suffix"] = "https://www.youtube.com" + url_
 
                 # Append current video to the final master list
                 final.append(output)
