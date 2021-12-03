@@ -88,7 +88,7 @@ class searchYouTube:
                     "simpleText", "NA"
                 )
                 # upload_date = curr_video["publishedTimeText"]["simpleText"]
-                output["Uploaded"] = upload_date
+                output["Upload Date"] = upload_date
 
                 # Get url from current video
                 url_ = (
