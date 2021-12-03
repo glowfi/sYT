@@ -1,89 +1,110 @@
-import requests
 import urllib.parse
+import requests
 import json
 import argparse
 import os
 
 
-class YoutubeSearch:
-    def __init__(self, search_terms: str, max_results=None):
-        self.search_terms = search_terms
-        self.max_results = max_results
-        self.videos = self._search()
+class searchYouTube:
+    """Youtube Crawler without API"""
 
-    def _search(self):
-        encoded_search = urllib.parse.quote_plus(self.search_terms)
-        BASE_URL = "https://youtube.com"
-        url = f"{BASE_URL}/results?search_query={encoded_search}"
+    def __init__(self, *args):
+        self.search_term = args[0]
+        self.max_results = args[1]
+        self.BASE_URL = "https://youtube.com"
+        self.videos = self.sendRequest()
+
+    def sendRequest(self):
+        encoded_search = urllib.parse.quote_plus(self.search_term)
+        url = f"{self.BASE_URL}/results?search_query={encoded_search}"
         response = requests.get(url).text
         while "ytInitialData" not in response:
             response = requests.get(url).text
-        results = self._parse_html(response)
+        results = self.parseHTML(response)
         if self.max_results is not None and len(results) > self.max_results:
             return results[: self.max_results]
         return results
 
-    def _parse_html(self, response):
-        results = []
-        start = response.index("ytInitialData") + len("ytInitialData") + 3
-        end = response.index("};", start) + 1
-        json_str = response[start:end]
-        data = json.loads(json_str)
+    def parseHTML(self, response):
 
-        videos = data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"][
-            "sectionListRenderer"
-        ]["contents"][0]["itemSectionRenderer"]["contents"]
+        # Get the string only having data of all the videos
+        st = response.index("ytInitialData") + len("ytInitialData") + 3
+        en = response.index("};", st) + 1
+        json_str = response[st:en]
 
+        # Convert the the above sliced string into json and select the contents part containing all the required data
+        response = json.loads(json_str)
+        videos = response["contents"]["twoColumnSearchResultsRenderer"][
+            "primaryContents"
+        ]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"]
+
+        #  Master list containing all the info about the videos
+        final = []
         for video in videos:
-            res = {}
+            # Current video master dictionary
+            output = {}
             if "videoRenderer" in video.keys():
-                video_data = video.get("videoRenderer", {})
-                # res["id"] = video_data.get("videoId", None)
-                # res["thumbnails"] = [thumb.get("url", None) for thumb in video_data.get("thumbnail", {}).get("thumbnails", [{}]) ]
-                res["title"] = (
-                    video_data.get("title", {}).get("runs", [[{}]])[0].get("text", None)
-                )
-                # res["long_desc"] = video_data.get("descriptionSnippet", {}).get("runs", [{}])[0].get("text", None)
-                res["channel"] = (
-                    video_data.get("longBylineText", {})
-                    .get("runs", [[{}]])[0]
-                    .get("text", None)
-                )
-                res["duration"] = video_data.get("lengthText", {}).get("simpleText", 0)
-                # res["views"] = video_data.get("viewCountText", {}).get("simpleText", 0)
-                res["publish_time"] = video_data.get("publishedTimeText", {}).get(
-                    "simpleText", 0
-                )
-                res["url_suffix"] = (
-                    video_data.get("navigationEndpoint", {})
-                    .get("commandMetadata", {})
-                    .get("webCommandMetadata", {})
-                    .get("url", None)
-                )
-                results.append(res)
-        return results
+                # Get current video
+                curr_video = video["videoRenderer"]
 
-    def to_dict(self, clear_cache=True):
-        result = self.videos
-        if clear_cache:
-            self.videos = ""
-        return result
+                # Get Thumbnails from current video [Future Release]
+                # thumbnails = curr_video["thumbnail"]["thumbnails"]
+                # tmp = []
+                # for t in thumbnails:
+                #     tmp.append(t["url"])
+                # output["Thumbnails"] = tmp
+                # del tmp
 
-    def to_json(self, clear_cache=True):
-        result = json.dumps({"videos": self.videos})
-        if clear_cache:
-            self.videos = ""
-        return result
+                # Get Title from current video
+                title = curr_video["title"]["runs"][0]["text"]
+                output["Title"] = title
+
+                # Get channel name from current video
+                channel_name = curr_video["longBylineText"]["runs"][0]["text"]
+                output["Channel"] = channel_name
+
+                # Get duration from current video
+                duration = curr_video["lengthText"]["simpleText"]
+                output["Duration"] = duration
+
+                # Get total views from current video
+                views = curr_video["shortViewCountText"]["simpleText"]
+                output["Views"] = views
+
+                # Get upload date from current video
+                upload_date = curr_video["publishedTimeText"]["simpleText"]
+                output["Uploaded"] = upload_date
+
+                # Get url from current video
+                url_ = curr_video["navigationEndpoint"]["commandMetadata"][
+                    "webCommandMetadata"
+                ]["url"]
+                output["Link"] = "https://www.youtube.com" + url_
+
+                # Append current video to the final master list
+                final.append(output)
+        return final
+
+    def get_json(self):
+        return json.dumps({"videos": self.videos})
+
+    def get_dict(self):
+        return self.videos
 
 
+# Command line args
 parser = argparse.ArgumentParser()
+
+# Add query to search
 parser.add_argument("-q", type=str, default="neovim", help="Query to search.")
 args = parser.parse_args()
 
+# Call the class
+obj = searchYouTube(args.q, 20)
 
-results = YoutubeSearch(args.q, max_results=20).to_dict()
-jsonString = json.dumps(results, indent=4)
-path = "~/.cache/data.json"
+# Get json and store it in the user folder
+jsonString = json.dumps(obj.get_dict(), indent=4)
+path = "~/data.json"
 jsonFile = open(os.path.expanduser(path), "w")
 jsonFile.write(jsonString)
 jsonFile.close()
