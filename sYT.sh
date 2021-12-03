@@ -13,5 +13,5 @@ function jsonArrayToTable(){
 }
 
 python ~/.local/bin/sYT.py -q "$query";
-cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "https://youtube.com{}"
+cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
 rm -rf ~/argparse ~/json ~/os ~/requests ~/urllib.parse ~/data.json
