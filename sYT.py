@@ -88,7 +88,7 @@ class searchYouTube:
                     "simpleText", "NA"
                 )
                 # upload_date = curr_video["publishedTimeText"]["simpleText"]
-                output["Upload Date"] = upload_date
+                output["Uploaded"] = upload_date
 
                 # Get url from current video
                 url_ = (
@@ -100,9 +100,8 @@ class searchYouTube:
                 # url_ = curr_video["navigationEndpoint"]["commandMetadata"][
                 #     "webCommandMetadata"
                 # ]["url"]
-
                 # output["Link"] = "https://www.youtube.com" + url_
-                output["url_suffix"] = "https://www.youtube.com" + url_
+                output["Link"] = "https://www.youtube.com" + url_
 
                 # Append current video to the final master list
                 final.append(output)
