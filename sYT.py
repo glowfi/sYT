@@ -41,16 +41,16 @@ class searchYouTube:
         #  Master list containing all the info about the videos
         final = []
         for video in videos:
+
             # Current video master dictionary
             output = {}
             if "videoRenderer" in video.keys():
 
                 # Get current video
                 curr_video = video.get("videoRenderer", {})
-                # curr_video = video["videoRenderer"]
 
                 # Get Thumbnails from current video [Future Release]
-                # thumbnails = curr_video["thumbnail"]["thumbnails"]
+                # thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
                 # tmp = []
                 # for t in thumbnails:
                 #     tmp.append(t["url"])
@@ -61,7 +61,6 @@ class searchYouTube:
                 title = (
                     curr_video.get("title", {}).get("runs", [[{}]])[0].get("text", "NA")
                 )
-                # title = curr_video["title"]["runs"][0]["text"]
                 output["Title"] = title
 
                 # Get channel name from current video
@@ -70,24 +69,20 @@ class searchYouTube:
                     .get("runs", [[{}]])[0]
                     .get("text", "NA")
                 )
-                # channel_name = curr_video["longBylineText"]["runs"][0]["text"]
                 output["Channel"] = channel_name
 
                 # Get duration from current video
                 duration = curr_video.get("lengthText", {}).get("simpleText", 0)
-                # duration = curr_video["lengthText"]["simpleText"]
                 output["Duration"] = duration
 
                 # Get total views from current video
                 views = curr_video.get("shortViewCountText", {}).get("simpleText", "NA")
-                # views = curr_video["shortViewCountText"]["simpleText"]
                 output["Views"] = views
 
                 # Get upload date from current video
                 upload_date = curr_video.get("publishedTimeText", {}).get(
                     "simpleText", "NA"
                 )
-                # upload_date = curr_video["publishedTimeText"]["simpleText"]
                 output["Uploaded"] = upload_date
 
                 # Get url from current video
@@ -97,10 +92,6 @@ class searchYouTube:
                     .get("webCommandMetadata", {})
                     .get("url", "NA")
                 )
-                # url_ = curr_video["navigationEndpoint"]["commandMetadata"][
-                #     "webCommandMetadata"
-                # ]["url"]
-                # output["Link"] = "https://www.youtube.com" + url_
                 output["Link"] = "https://www.youtube.com" + url_
 
                 # Append current video to the final master list

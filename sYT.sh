@@ -9,7 +9,7 @@ echo "=== Showing results for $query ==="
 echo ""
 
 function jsonArrayToTable(){
-     jq -r '(.[0] | ([keys[] | .] |(., map(length*"-")))), (.[] | ([keys[] as $k | .[$k]])) | @tsv' | column -t -s $'\t'   
+     jq -r '(["Channel","Duration","Views","Uploaded","Title","Link"] | (., map(length*"-"))), (.[] | [.Channel, .Duration,.Views,.Uploaded,.Title,.Link]) | @tsv' | column -t -s $'\t'  
 }
 
 python ~/.local/bin/sYT.py -q "$query";
