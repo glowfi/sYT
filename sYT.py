@@ -118,6 +118,5 @@ obj = searchYouTube(args.q, 20)
 # Get json and store it in the user folder
 jsonString = json.dumps(obj.get_dict(), indent=4)
 path = "~/data.json"
-jsonFile = open(os.path.expanduser(path), "w")
-jsonFile.write(jsonString)
-jsonFile.close()
+with open(os.path.expanduser(path), "w") as f:
+    f.write(jsonString)
