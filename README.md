@@ -48,4 +48,4 @@ chmod +x ~/.local/bin/sYT.sh
 
 **NOTE**
 
-**Try making an alias in your shell and type sYT (not sh\*t)**
+**Try creating an alias in your shell as sYT (not sh\*t) for this program**
