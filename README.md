@@ -1,6 +1,6 @@
 # sYT
 
-> search and watch YoutTube videos from terminal without youtube API.
+> search and watch YouTube videos from terminal without youtube API.
 
 ## Description
 
