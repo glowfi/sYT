@@ -1,4 +1,3 @@
-import urllib.parse
 import requests
 import json
 import argparse
@@ -15,7 +14,8 @@ class searchYouTube:
         self.videos = self.sendRequest()
 
     def sendRequest(self):
-        encoded_search = urllib.parse.quote_plus(self.search_term)
+        encoded_search = self.search_term.split(" ")
+        encoded_search = "+".join(encoded_search)
         url = f"{self.BASE_URL}/results?search_query={encoded_search}"
         response = requests.get(url).text
         while "ytInitialData" not in response:
