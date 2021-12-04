@@ -17,9 +17,15 @@ function progress ()
     echo ""
 }
 
-# Pretty print data
+# Pretty print data functions
 function jsonArrayToTable(){
      jq -r '(["Channel","Duration","Views","Uploaded","Title","Link"] | (., map(length*"-"))), (.[] | [.Channel, .Duration,.Views,.Uploaded,.Title,.Link]) | @tsv' | column -t -s $'\t'  
+}
+
+# Pretty print data functions dmenu
+function jsonArrayToTabled(){
+    tab_space="\t"
+    jq -r '.[]| "\(.Channel)'"$tab_space"'|\(.Duration)'"$tab_space"'|\(.Views)'"$tab_space"'|\(.Uploaded)'"$tab_space"'|\(.Title)'"$tab_space"'|\(.Link)"' | column -t -s $'\t'
 }
 
 # Execute script
@@ -32,7 +38,7 @@ if [[ "$1" ]]; then
     # Get data
     if [[ "$query" ]]; then
     python ~/.local/bin/sYT.py -q "$query";
-    cat ~/data.json | jsonArrayToTable |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}'|xargs -t -I {} mpv "{}"
+    cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}'|xargs -t -I {} mpv "{}"
     fi
 
     
@@ -49,4 +55,5 @@ else
 fi
 
 # Cleanup
+clear
 rm -rf ~/argparse ~/json ~/os ~/requests ~/urllib.parse ~/data.json
