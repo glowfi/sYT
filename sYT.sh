@@ -38,7 +38,7 @@ if [[ "$1" ]]; then
     # Get data
     if [[ "$query" ]]; then
     python ~/.local/bin/sYT.py -q "$query";
-    cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}'|xargs -t -I {} mpv "{}"
+    cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//' |xargs -t -I {} mpv "{}"
     fi
 
     
