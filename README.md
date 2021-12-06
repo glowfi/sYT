@@ -1,6 +1,6 @@
 # sYT
 
-> search and watch YouTube videos from terminal without youtube API.
+> search and watch YouTube videos from terminal without youtube API or just use as youtube downloader.
 
 ## Description
 
@@ -12,7 +12,7 @@
 -   python 3.5+ (For scrapping data)
 -   fzf or dmenu (For menu)
 -   mpv (For playing video)
--   youtube-dl
+-   youtube-dl (For downloading videos)
 -   jq (For formatting json)
 
 ## Installation
@@ -38,11 +38,16 @@ chmod +x ~/.local/bin/sYT.sh
 
 ```sh
 
-# RUN SCRIPT IN TERMINAL WITH FZF
-~/.local/bin/sYT.sh
+sYT.sh -p "dmenu" -d "true"
+sYT.sh -fl "https://youtube.com/abcdef" -p "fzf" [Pass the link as argument if u want to uses fzf]
+sYT.sh -dl "true" -p "dmenu" [Dmenu will ask you to paste th elink in the prompt.Pass true or false for dl]
 
-# RUN SCRIPT WITH DMENU
-~/.local/bin/sYT.sh "dmenu"
+
+-p    | --provider      Fzf or Dmenu
+-d    | --download      Download searched video (true or false) [Only download do not play the video]
+-dl   | --dlink         Download any youtube video with a link dmenu as provider.
+-fl   | --dlink         Download any youtube video with a link fzf as provider.
+-h    | --help          Prints help
 
 ```
 
