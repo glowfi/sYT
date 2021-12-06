@@ -124,7 +124,9 @@ elif [[ "$provider" = "fzf" ]]; then
             cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
         else
             link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
-            youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} "$link"
+            if [[ "$link" != "" ]]; then
+                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} "$link"
+            fi
         fi
     fi
 fi
