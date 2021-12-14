@@ -32,21 +32,46 @@ function jsonArrayToTabled(){
 provider="fzf"
 download="false"
 flink=""
+flinkmulti=""
 dlink="false"
+multilink=""
 
 usage()
 {
 cat << EOF
-usage: sYT.sh -p "dmenu" -d "true"
-usage: sYT.sh -fl "https://youtube.com/abcdef" -p "fzf" [Pass the link as argument if u want to uses fzf]
-usage: sYT.sh -dl "true" -p "dmenu" [Dmenu will ask you to paste th elink in the prompt.Pass true or false for dl]
 
+### ONLY WATCH VIDEOS
+Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
+Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
+
+
+#### DOWNLOAD BY SEARCHING VIDEOS
+Note : For downloading -d flag must be given as true for downloading searched videos.
 
 -p    | --provider      Fzf or Dmenu
 -d    | --download      Download searched video (true or false) [Only download do not play the video]
--dl   | --dlink         Download any youtube video with a link dmenu as provider.
--fl   | --dlink         Download any youtube video with a link fzf as provider.
--h    | --help          Prints help 
+-ml   | --multilink     Download multiple youtube videos fzf as provider.
+
+Example 1: sYT.sh -d  "true" -p "fzf"            [Download single searched videos with fzf as provider]
+Example 2: sYT.sh -d  "true" -p "fzf" -ml "true" [Download multiple searched videos with fzf as provider]
+
+
+#### DOWNLOAD BY PASSING LINKS AS ARGUMENTS
+Note : For downloading videos directly by passing link as arguments.
+
+-dl   | --dlink         Download any youtube video with a single link dmenu as provider.
+-fl   | --flink         Download any youtube video with a single link fzf as provider.
+-flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
+
+Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as argument if u want to uses fzf]
+
+Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf" [Pass multi link as argument if u want to uses fzf]
+
+Note :  Dmenu will ask you to paste the link in the prompt.Pass true or false for dl
+
+Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
+
+-h   | --help          Prints help 
 EOF
 }
 
@@ -71,6 +96,14 @@ do
                         flink="$2"
                         shift
                         ;;
+                -flm|--flinkmulti)
+                        flinkmulti="$2"
+                        shift
+                        ;;
+                -ml|--multilink)
+                        multilink="$2"
+                        shift
+                        ;;
 
                 --help|*)
                         usage
@@ -86,7 +119,8 @@ if [[ "$provider" = "dmenu" ]]; then
         dlink=$(echo >/dev/null |dmenu -p "Paste video link with ctrl+shift+y :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee")
         # Check if any link given
         if [[ "$dlink" != "" ]]; then
-            youtube-dl -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee"  | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} "$dlink"
+            youtube-dl -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee"  | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
+            notify-send "Started Downloading ..."
         else 
             notify-send "No link Given"
         fi
@@ -102,7 +136,7 @@ if [[ "$provider" = "dmenu" ]]; then
             cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//' |xargs -t -I {} mpv "{}"
             else
                 link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//')
-                youtube-dl -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} "$link"
+                youtube-dl -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#477D6F" -sf "#eeeeee" | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi
@@ -110,7 +144,10 @@ if [[ "$provider" = "dmenu" ]]; then
 elif [[ "$provider" = "fzf" ]]; then
     # Check if any link given
     if [[ "$flink" != "" ]]; then
-        youtube-dl -F "$flink" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} "$flink"
+        youtube-dl -F "$flink" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$flink"
+    elif [[ "$flinkmulti" != "" ]]; then
+        my_links=$(echo $flinkmulti | tr " " "\n")
+         youtube-dl -f best --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" $my_links
     else
         # Read user query
         read -p $'\e[31mSearch query\e[0m :' query
@@ -123,9 +160,27 @@ elif [[ "$provider" = "fzf" ]]; then
         if [[ "$download" = "false" ]]; then
             cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
         else
-            link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
-            if [[ "$link" != "" ]]; then
-                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} "$link"
+            if [[ "$multilink" == "true" ]]; then
+                link=$(cat ~/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+
+                # echo "$link"
+                my_array=($(echo $link | tr " " "\n"))
+                # quality_array=()
+                c=1
+                # echo "$my_array"
+                # echo "${#my_array[@]}"
+                for i in "${my_array[@]}"
+                    do
+                        # echo "
+                        # echo ""
+                        # echo ""
+                        youtube-dl -F "$i" | sed '3,$!d' | fzf --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
+                        ((c++))
+                done
+                # youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+            elif [[ "$link" != "" ]]; then
+                link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
+                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi
