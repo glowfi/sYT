@@ -13,6 +13,7 @@
 -   fzf or dmenu (For menu)
 -   mpv (For playing video)
 -   youtube-dl (For downloading videos)
+-   aria2c (For downloading videos)
 -   jq (For formatting json)
 
 ## Installation
