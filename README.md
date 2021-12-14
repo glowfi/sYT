@@ -61,6 +61,7 @@ Note : For downloading videos directly by passing link as arguments.
 -dl   | --dlink         Download any youtube video with a single link dmenu as provider.
 -fl   | --flink         Download any youtube video with a single link fzf as provider.
 -flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
+-mav  | --mergeaudvid   Merge audio and video with fzf as provider.
 
 Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as argument if u want to uses fzf]
 
@@ -69,6 +70,8 @@ Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf
 Note :  Dmenu will ask you to paste the link in the prompt.Pass true or false for dl
 
 Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
+
+Example 4: sYT.sh -d "true" -mav "true"
 
 -h   | --help          Prints help
 
