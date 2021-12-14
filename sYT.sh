@@ -35,6 +35,7 @@ flink=""
 flinkmulti=""
 dlink="false"
 multilink=""
+mav=""
 
 usage()
 {
@@ -62,6 +63,7 @@ Note : For downloading videos directly by passing link as arguments.
 -dl   | --dlink         Download any youtube video with a single link dmenu as provider.
 -fl   | --flink         Download any youtube video with a single link fzf as provider.
 -flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
+-mav  | --mergeaudvid   Merge audio and video with fzf as provider.
 
 Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as argument if u want to uses fzf]
 
@@ -70,6 +72,8 @@ Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf
 Note :  Dmenu will ask you to paste the link in the prompt.Pass true or false for dl
 
 Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
+
+Example 4: sYT.sh -d "true" -mav "true"
 
 -h   | --help          Prints help 
 EOF
@@ -102,6 +106,10 @@ do
                         ;;
                 -ml|--multilink)
                         multilink="$2"
+                        shift
+                        ;;
+                -mav|--mergeaudvid)
+                        mav="$2"
                         shift
                         ;;
 
@@ -160,7 +168,28 @@ elif [[ "$provider" = "fzf" ]]; then
         if [[ "$download" = "false" ]]; then
             cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
         else
-            if [[ "$multilink" == "true" ]]; then
+            if [[ "$mav" == "true" ]]; then
+                link=$(cat ~/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+                title=$(youtube-dl --skip-download --get-title --no-warnings "$link" | sed 2d )
+
+                # Get video quality
+                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for video:" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --output "my_video_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+
+                # Get audio quality
+                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for audio:" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --output "my_audio_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+
+                # Merge
+                vid=$(find ~ \( ! -regex '.*/\..*' \) -type f -name "my_video_fetched.*")
+                aud=$(find ~ \( ! -regex '.*/\..*' \) -type f -name "my_audio_fetched.*")
+                echo "$vid"
+                echo "$aud"
+                ffmpeg -i "$vid" -i "$aud" -map 0:0 -map 1:0 -c:v copy -c:a aac -b:a 256k -shortest "$title".mp4
+                rm -rf "$vid"
+                rm -rf "$aud"
+
+
+
+            elif [[ "$multilink" == "true" ]]; then
                 link=$(cat ~/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
 
                 # echo "$link"
@@ -179,6 +208,7 @@ elif [[ "$provider" = "fzf" ]]; then
                 done
                 # youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             else
+            # elif [[ "$link" != "" ]]; then
                 link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
                 youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
