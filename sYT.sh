@@ -169,7 +169,7 @@ elif [[ "$provider" = "fzf" ]]; then
             cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
         else
             if [[ "$mav" == "true" ]]; then
-                link=$(cat ~/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+                link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
                 title=$(youtube-dl --skip-download --get-title --no-warnings "$link" | sed 2d )
 
                 # Get video quality
@@ -191,24 +191,14 @@ elif [[ "$provider" = "fzf" ]]; then
 
             elif [[ "$multilink" == "true" ]]; then
                 link=$(cat ~/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
-
-                # echo "$link"
                 my_array=($(echo $link | tr " " "\n"))
-                # quality_array=()
                 c=1
-                # echo "$my_array"
-                # echo "${#my_array[@]}"
                 for i in "${my_array[@]}"
                     do
-                        # echo "
-                        # echo ""
-                        # echo ""
                         youtube-dl -F "$i" | sed '3,$!d' | fzf --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
                         ((c++))
                 done
-                # youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             else
-            # elif [[ "$link" != "" ]]; then
                 link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
                 youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
