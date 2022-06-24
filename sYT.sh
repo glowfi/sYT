@@ -124,10 +124,10 @@ done
 if [[ "$provider" = "dmenu" ]]; then
     if [[ "$dlink" = "true" ]]; then
         # Get video link
-        dlink=$(echo >/dev/null |dmenu -p "Paste video link with ctrl+shift+y :" -nb "#32302f" -nf "#bbbbbb" -sb "#676085" -sf "#eeeeee")
+        dlink=$(echo >/dev/null |dmenu -p "Paste video link with ctrl+shift+y :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee")
         # Check if any link given
         if [[ "$dlink" != "" ]]; then
-            youtube-dl -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#676085" -sf "#eeeeee"  | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
+            youtube-dl -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee"  | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
             notify-send "Started Downloading ..."
         else 
             notify-send "No link Given"
@@ -135,16 +135,16 @@ if [[ "$provider" = "dmenu" ]]; then
 
     else
         # Read user query
-        query=$(echo >/dev/null |dmenu -p "Search query :" -nb "#32302f" -nf "#bbbbbb" -sb "#676085" -sf "#eeeeee")
+        query=$(echo >/dev/null |dmenu -p "Search query :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee")
 
         # Get data
         if [[ "$query" ]]; then
             python ~/.local/bin/sYT.py -q "$query";
             if [[ "$download" = "false" ]]; then
-            cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#676085" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//' |xargs -t -I {} mpv "{}"
+            cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//' |xargs -t -I {} mpv "{}"
             else
-                link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#676085" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//')
-                youtube-dl -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#676085" -sf "#eeeeee" | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//')
+                youtube-dl -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi
