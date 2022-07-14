@@ -127,7 +127,7 @@ if [[ "$provider" = "dmenu" ]]; then
         dlink=$(echo >/dev/null |dmenu -p "Paste video link with ctrl+shift+y :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee")
         # Check if any link given
         if [[ "$dlink" != "" ]]; then
-            youtube-dl -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee"  | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
+            yt-dlp -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
             notify-send "Started Downloading ..."
         else 
             notify-send "No link Given"
@@ -144,7 +144,7 @@ if [[ "$provider" = "dmenu" ]]; then
             cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//' |xargs -t -I {} mpv "{}"
             else
                 link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $NF}' | sed '1s/^.//')
-                youtube-dl -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" -nb "#32302f" -nf "#bbbbbb" -sb "#458588" -sf "#eeeeee" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi
@@ -152,10 +152,10 @@ if [[ "$provider" = "dmenu" ]]; then
 elif [[ "$provider" = "fzf" ]]; then
     # Check if any link given
     if [[ "$flink" != "" ]]; then
-        youtube-dl -F "$flink" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$flink"
+        yt-dlp -F "$flink" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$flink"
     elif [[ "$flinkmulti" != "" ]]; then
         my_links=$(echo $flinkmulti | tr " " "\n")
-         youtube-dl -f best --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" $my_links
+         yt-dlp -f best --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" $my_links
     else
         # Read user query
         read -p $'\e[31mSearch query\e[0m :' query
@@ -170,13 +170,13 @@ elif [[ "$provider" = "fzf" ]]; then
         else
             if [[ "$mav" == "true" ]]; then
                 link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
-                title=$(youtube-dl --skip-download --get-title --no-warnings "$link" | sed 2d )
+                title=$(yt-dlp --skip-download --get-title --no-warnings "$link" | sed 2d )
 
                 # Get video quality
-                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for video:" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --output "my_video_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for video:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_video_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
 
                 # Get audio quality
-                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for audio:" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --output "my_audio_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for audio:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_audio_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
 
                 # Merge
                 vid=$(find ~ \( ! -regex '.*/\..*' \) -type f -name "my_video_fetched.*")
@@ -195,12 +195,12 @@ elif [[ "$provider" = "fzf" ]]; then
                 c=1
                 for i in "${my_array[@]}"
                     do
-                        youtube-dl -F "$i" | sed '3,$!d' | fzf --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
+                        yt-dlp -F "$i" | sed '3,$!d' | fzf --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
                         ((c++))
                 done
             else
                 link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
-                youtube-dl -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} youtube-dl -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi

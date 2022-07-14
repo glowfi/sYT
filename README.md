@@ -1,6 +1,6 @@
 # sYT
 
-> search and watch YouTube videos from terminal without youtube API or just use as youtube downloader.
+> search,watch and download YouTube videos from terminal without youtube API or just use as youtube downloader.
 
 ## Description
 
@@ -12,7 +12,7 @@
 -   python 3.5+ (For scrapping data)
 -   fzf or dmenu (For menu)
 -   mpv (For playing video)
--   youtube-dl (For downloading videos)
+-   yt-dlp (For downloading videos)
 -   aria2c (For downloading videos)
 -   jq (For formatting json)
 
