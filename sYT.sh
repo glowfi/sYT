@@ -148,7 +148,7 @@ if [[ "$provider" = "dmenu" ]]; then
                 clear
                 printf "Now Playing : \n$videoInfo"
                 echo ""
-                sYT.sh
+                $0
 
             else
                 link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
@@ -181,7 +181,7 @@ elif [[ "$provider" = "fzf" ]]; then
             clear
             printf "Now Playing : \n$videoInfo"
             echo ""
-            sYT.sh
+            $0
 
         else
             if [[ "$mav" == "true" ]]; then
