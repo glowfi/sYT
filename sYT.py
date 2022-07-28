@@ -117,6 +117,6 @@ obj = searchYouTube(args.q, 20)
 
 # Get json and store it in the user folder
 jsonString = json.dumps(obj.get_dict(), indent=4)
-path = "~/data.json"
+path = "~/.cache/data.json"
 with open(os.path.expanduser(path), "w") as f:
     f.write(jsonString)

@@ -141,7 +141,7 @@ if [[ "$provider" = "dmenu" ]]; then
         if [[ "$query" ]]; then
             python ~/.local/bin/sYT.py -q "$query";
             if [[ "$download" = "false" ]]; then
-                selectedVideo=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i)
                 videoInfo=$(echo "$selectedVideo"|xargs)
                 currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
                 setsid -f mpv "$currLink" > /dev/null 2>&1
@@ -151,7 +151,7 @@ if [[ "$provider" = "dmenu" ]]; then
                 $0
 
             else
-                link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
+                link=$(cat ~/.cache/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
                 yt-dlp -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
@@ -174,7 +174,7 @@ elif [[ "$provider" = "fzf" ]]; then
         # Get data
         python ~/.local/bin/sYT.py -q "$query";
         if [[ "$download" = "false" ]]; then
-            selectedVideo=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse)
+            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse)
             videoInfo=$(echo "$selectedVideo"|xargs)
             currLink=$(echo "$selectedVideo"|awk '{print $NF}')
             setsid -f mpv "$currLink" > /dev/null 2>&1
@@ -185,7 +185,7 @@ elif [[ "$provider" = "fzf" ]]; then
 
         else
             if [[ "$mav" == "true" ]]; then
-                link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+                link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
                 title=$(yt-dlp --skip-download --get-title --no-warnings "$link" | sed 2d )
 
                 # Get video quality
@@ -206,7 +206,7 @@ elif [[ "$provider" = "fzf" ]]; then
 
 
             elif [[ "$multilink" == "true" ]]; then
-                link=$(cat ~/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+                link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
                 my_array=($(echo $link | tr " " "\n"))
                 c=1
                 for i in "${my_array[@]}"
@@ -215,7 +215,7 @@ elif [[ "$provider" = "fzf" ]]; then
                         ((c++))
                 done
             else
-                link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
+                link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
                 yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
@@ -223,4 +223,4 @@ elif [[ "$provider" = "fzf" ]]; then
 fi
 
 # Cleanup
-rm -rf ~/argparse ~/json ~/os ~/requests ~/urllib.parse ~/data.json
+rm -rf ~/argparse ~/json ~/os ~/requests ~/urllib.parse ~/.cache/data.json
