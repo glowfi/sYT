@@ -141,7 +141,15 @@ if [[ "$provider" = "dmenu" ]]; then
         if [[ "$query" ]]; then
             python ~/.local/bin/sYT.py -q "$query";
             if [[ "$download" = "false" ]]; then
-            cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//' |xargs -t -I {} mpv "{}"
+                selectedVideo=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i)
+                videoInfo=$(echo "$selectedVideo"|xargs)
+                currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
+                setsid -f mpv "$currLink" > /dev/null 2>&1
+                clear
+                printf "Now Playing : \n$videoInfo"
+                echo ""
+                sYT.sh
+
             else
                 link=$(cat ~/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
                 yt-dlp -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
@@ -166,7 +174,15 @@ elif [[ "$provider" = "fzf" ]]; then
         # Get data
         python ~/.local/bin/sYT.py -q "$query";
         if [[ "$download" = "false" ]]; then
-            cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}'|xargs -t -I {} mpv "{}"
+            selectedVideo=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse)
+            videoInfo=$(echo "$selectedVideo"|xargs)
+            currLink=$(echo "$selectedVideo"|awk '{print $NF}')
+            setsid -f mpv "$currLink" > /dev/null 2>&1
+            clear
+            printf "Now Playing : \n$videoInfo"
+            echo ""
+            sYT.sh
+
         else
             if [[ "$mav" == "true" ]]; then
                 link=$(cat ~/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
