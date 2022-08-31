@@ -186,7 +186,7 @@ elif [[ "$provider" = "fzf" ]]; then
         else
             if [[ "$mav" == "true" ]]; then
                 link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
-                title=$(yt-dlp --skip-download --get-title --no-warnings "$link" | sed 2d )
+                title=$(yt-dlp --skip-download --get-title --no-warnings "$link" | sed 2d |sed 's/[^a-zA-Z0-9 ]//g')
 
                 # Get video quality
                 yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for video:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_video_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
@@ -199,6 +199,7 @@ elif [[ "$provider" = "fzf" ]]; then
                 aud=$(find ~ \( ! -regex '.*/\..*' \) -type f -name "my_audio_fetched.*")
                 echo "$vid"
                 echo "$aud"
+                echo "$title"
                 ffmpeg -i "$vid" -i "$aud" -map 0:0 -map 1:0 -c:v copy -c:a aac -b:a 256k -shortest "$title".mp4
                 rm -rf "$vid"
                 rm -rf "$aud"
