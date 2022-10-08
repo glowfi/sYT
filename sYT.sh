@@ -205,7 +205,7 @@ elif [[ "$provider" = "fzf" ]]; then
         if [[ "$download" = "false" ]]; then
 
             start_ueberzug
-            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
             stop_ueberzug
             
             videoInfo=$(echo "$selectedVideo"|xargs)
