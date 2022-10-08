@@ -19,16 +19,45 @@ function progress ()
 
 # Pretty print data functions
 function jsonArrayToTable(){
-     jq -r '(["Channel","Duration","Views","Uploaded","Title","Link"] | (., map(length*"-"))), (.[] | [.Channel, .Duration,.Views,.Uploaded,.Title,.Link]) | @tsv' | column -t -s $'\t'  
+     jq -r '(["Channel","Duration","Views","Uploaded","Title","Link","Location"] | (., map(length*"-"))), (.[] | [.Channel, .Duration,.Views,.Uploaded,.Title,.Link,.Location]) | @tsv' | column -t -s $'\t' | sed "1,2d"
 }
 
 # Pretty print data functions dmenu
 function jsonArrayToTabled(){
     tab_space="\t"
-    jq -r '.[]| "\(.Channel)'"$tab_space"'|\(.Duration)'"$tab_space"'|\(.Views)'"$tab_space"'|\(.Uploaded)'"$tab_space"'|\(.Title)'"$tab_space"'|\(.Link)"' | column -t -s $'\t'
+    jq -r '.[]| "\(.Channel)'"$tab_space"'|\(.Duration)'"$tab_space"'|\(.Views)'"$tab_space"'|\(.Uploaded)'"$tab_space"'|\(.Title)'"$tab_space"'|\(.Link)"' | column -t -s $'\t' | sed "1,2d"
 }
 
-# Commadn args
+export FIFO="/tmp/image-preview.fifo"
+
+cache="~/.cache/prev.sh/"
+mkdir -p "$cache"
+
+start_ueberzug() {
+    rm -f "$FIFO"
+    mkfifo "$FIFO"
+    ueberzug layer --parser json <"$FIFO" &
+    exec 3>"$FIFO"
+}
+stop_ueberzug() {
+    exec 3>&-
+    rm -f "$FIFO"
+}
+
+preview_img() {
+    [ -d "$1" ] && echo "$1 is a directory" ||
+        printf '%s\n' '{"action": "add", "identifier": "image-preview", "path": "'"$1"'", "x": "2", "y": "1", "width": "'"$FZF_PREVIEW_COLUMNS"'", "height": "'"$FZF_PREVIEW_LINES"'"}' >"$FIFO"
+    metadata="$(cat "$1"|tail -4)"
+    printf "\n\n\n\n\n\n\n\n\n"
+    echo "$metadata"
+}
+[ "$1" = "preview_img" ] && {
+    preview_img "$2"
+    exit
+}
+
+
+# Command args
 provider="fzf"
 download="false"
 flink=""
@@ -174,9 +203,14 @@ elif [[ "$provider" = "fzf" ]]; then
         # Get data
         python ~/.local/bin/sYT.py -q "$query";
         if [[ "$download" = "false" ]]; then
-            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse)
+
+            start_ueberzug
+            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+            stop_ueberzug
+            
             videoInfo=$(echo "$selectedVideo"|xargs)
-            currLink=$(echo "$selectedVideo"|awk '{print $NF}')
+            currLink=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev)
+            
             setsid -f mpv "$currLink" > /dev/null 2>&1
             clear
             printf "Now Playing : \n$videoInfo"
@@ -185,7 +219,11 @@ elif [[ "$provider" = "fzf" ]]; then
 
         else
             if [[ "$mav" == "true" ]]; then
-                link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+                start_ueberzug
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                stop_ueberzug
+
+                link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
                 title=$(yt-dlp --skip-download --get-title --no-warnings "$link" | sed 2d |sed 's/[^a-zA-Z0-9 ]//g')
 
                 # Get video quality
@@ -207,7 +245,11 @@ elif [[ "$provider" = "fzf" ]]; then
 
 
             elif [[ "$multilink" == "true" ]]; then
-                link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}' | xargs)
+                start_ueberzug
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                stop_ueberzug
+                
+                link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
                 my_array=($(echo $link | tr " " "\n"))
                 c=1
                 for i in "${my_array[@]}"
@@ -216,7 +258,12 @@ elif [[ "$provider" = "fzf" ]]; then
                         ((c++))
                 done
             else
-                link=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --cycle --height 20 --reverse | awk '{print $NF}')
+                start_ueberzug
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                stop_ueberzug
+
+                link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
+
                 yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi

@@ -2,6 +2,8 @@ import requests
 import json
 import argparse
 import os
+import urllib.request
+import time
 
 
 class searchYouTube:
@@ -25,6 +27,18 @@ class searchYouTube:
             return results[: self.max_results]
         return results
 
+    def download(self, url, metadata):
+        thumbDir = os.path.expanduser("~/.cache/thumbs")
+        file_name = str(time.time())
+        full_path = thumbDir + "/" + file_name + ".png"
+        urllib.request.urlretrieve(url, full_path)
+
+        with open(f"{full_path}", "a+") as f:
+            f.write(metadata)
+
+        # os.system(f"echo {metadata} >> {full_path}")
+        return full_path
+
     def parseHTML(self, response):
 
         # Get the string only having data of all the videos
@@ -40,6 +54,8 @@ class searchYouTube:
 
         #  Master list containing all the info about the videos
         final = []
+
+        metadata = ""
         for video in videos:
 
             # Current video master dictionary
@@ -49,19 +65,12 @@ class searchYouTube:
                 # Get current video
                 curr_video = video.get("videoRenderer", {})
 
-                # Get Thumbnails from current video [Future Release]
-                # thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
-                # tmp = []
-                # for t in thumbnails:
-                #     tmp.append(t["url"])
-                # output["Thumbnails"] = tmp
-                # del tmp
-
                 # Get Title from current video
                 title = (
                     curr_video.get("title", {}).get("runs", [[{}]])[0].get("text", "NA")
                 )
                 output["Title"] = title
+                metadata += f"Title : {title}\n"
 
                 # Get channel name from current video
                 channel_name = (
@@ -70,20 +79,24 @@ class searchYouTube:
                     .get("text", "NA")
                 )
                 output["Channel"] = channel_name
+                metadata += f"Channel Name : {channel_name}\n"
 
                 # Get duration from current video
                 duration = curr_video.get("lengthText", {}).get("simpleText", 0)
                 output["Duration"] = duration
+                metadata += f"Duration : {duration}\n"
 
                 # Get total views from current video
                 views = curr_video.get("shortViewCountText", {}).get("simpleText", "NA")
                 output["Views"] = views
+                metadata += f"Views : {views}\n"
 
                 # Get upload date from current video
                 upload_date = curr_video.get("publishedTimeText", {}).get(
                     "simpleText", "NA"
                 )
                 output["Uploaded"] = upload_date
+                metadata += f"Upload Date : {upload_date}\n"
 
                 # Get url from current video
                 url_ = (
@@ -93,6 +106,16 @@ class searchYouTube:
                     .get("url", "NA")
                 )
                 output["Link"] = "https://www.youtube.com" + url_
+
+                # Get Thumbnails from current video [Future Release]
+                thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
+                tmp = []
+                for t in thumbnails:
+                    tmp.append(t["url"])
+                output["Thumbnails"] = tmp[0]
+                location = self.download(tmp[0], metadata)
+                output["Location"] = location
+                del tmp
 
                 # Append current video to the final master list
                 final.append(output)
@@ -111,6 +134,10 @@ parser = argparse.ArgumentParser()
 # Add query to search
 parser.add_argument("-q", type=str, default="neovim", help="Query to search.")
 args = parser.parse_args()
+
+# Delete Cached Thumbnails
+thumbDir = os.path.expanduser("~/.cache/thumbs")
+os.system(f"rm -rf {thumbDir};mkdir -p {thumbDir}")
 
 # Call the class
 obj = searchYouTube(args.q, 20)
