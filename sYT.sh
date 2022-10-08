@@ -205,7 +205,7 @@ elif [[ "$provider" = "fzf" ]]; then
         if [[ "$download" = "false" ]]; then
 
             start_ueberzug
-            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
             stop_ueberzug
             
             videoInfo=$(echo "$selectedVideo"|xargs)
@@ -220,17 +220,17 @@ elif [[ "$provider" = "fzf" ]]; then
         else
             if [[ "$mav" == "true" ]]; then
                 start_ueberzug
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
 
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
                 title=$(yt-dlp --skip-download --get-title --no-warnings "$link" | sed 2d |sed 's/[^a-zA-Z0-9 ]//g')
 
                 # Get video quality
-                yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for video:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_video_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '1,5d' | grep "video only" | fzf --cycle --prompt="Choose Quality for video:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_video_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
 
                 # Get audio quality
-                yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose Quality for audio:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_audio_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '1,5d' | grep "audio only" | fzf --cycle --prompt="Choose Quality for audio:" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --output "my_audio_fetched.%(ext)s" --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
 
                 # Merge
                 vid=$(find ~ \( ! -regex '.*/\..*' \) -type f -name "my_video_fetched.*")
@@ -246,7 +246,7 @@ elif [[ "$provider" = "fzf" ]]; then
 
             elif [[ "$multilink" == "true" ]]; then
                 start_ueberzug
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
                 
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
@@ -254,17 +254,17 @@ elif [[ "$provider" = "fzf" ]]; then
                 c=1
                 for i in "${my_array[@]}"
                     do
-                        yt-dlp -F "$i" | sed '3,$!d' | fzf --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
+                        yt-dlp -F "$i" | sed '1,5d'| grep -v "images" | grep -v "video only" | grep -v "audio only" | fzf --cycle --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
                         ((c++))
                 done
             else
                 start_ueberzug
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable |fzf -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
 
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
 
-                yt-dlp -F "$link" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                yt-dlp -F "$link" | sed '1,5d'| grep -v "images" | grep -v "video only" | grep -v "audio only" | fzf --cycle --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi
