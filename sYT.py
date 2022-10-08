@@ -113,7 +113,7 @@ class searchYouTube:
                 for t in thumbnails:
                     tmp.append(t["url"])
                 output["Thumbnails"] = tmp[0]
-                location = self.download(tmp[0], metadata)
+                location = self.download(tmp[0], "\n\n" + metadata)
                 output["Location"] = location
                 del tmp
 
