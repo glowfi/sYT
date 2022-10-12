@@ -30,7 +30,7 @@ function jsonArrayToTabled(){
 
 export FIFO="/tmp/image-preview.fifo"
 
-cache="~/.cache/prev.sh/"
+cache="/home/$USER/.cache/prev.sh/"
 mkdir -p "$cache"
 
 start_ueberzug() {
