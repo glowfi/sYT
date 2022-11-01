@@ -32,11 +32,11 @@ class searchYouTube:
         file_name = str(time.time())
         full_path = thumbDir + "/" + file_name + ".png"
         urllib.request.urlretrieve(url, full_path)
+        metadata += f"Thumbnail : {full_path}\n"
 
         with open(f"{full_path}", "a+") as f:
             f.write(metadata)
 
-        # os.system(f"echo {metadata} >> {full_path}")
         return full_path
 
     def parseHTML(self, response):
@@ -106,6 +106,7 @@ class searchYouTube:
                     .get("url", "NA")
                 )
                 output["Link"] = "https://www.youtube.com" + url_
+                metadata += f"Link : {output['Link']}\n"
 
                 # Get Thumbnails from current video [Future Release]
                 thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
@@ -115,6 +116,8 @@ class searchYouTube:
                 output["Thumbnails"] = tmp[0]
                 location = self.download(tmp[0], "\n\n" + metadata)
                 output["Location"] = location
+
+                metadata = ""
                 del tmp
 
                 # Append current video to the final master list
