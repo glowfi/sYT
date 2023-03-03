@@ -17,9 +17,10 @@ class searchYouTube:
 
         self.BASE_URL = "https://youtube.com"
 
-        if self.algo == "v1":
+        if self.algo == "v2":
+            self.videos = self.parseV2()
+        else:
             self.videos = self.sendRequest()
-        self.videos = self.parseV2()
 
     def human_time_duration(self, seconds):
         TIME_DURATION_UNITS = (
@@ -113,6 +114,7 @@ class searchYouTube:
         st = response.index("ytInitialData") + len("ytInitialData") + 3
         en = response.index("};", st) + 1
         json_str = response[st:en]
+        c = 0
 
         # Convert the the above sliced string into json
         response = json.loads(json_str)
@@ -127,67 +129,73 @@ class searchYouTube:
         for video in videos:
             # Current video master dictionary
             output = {}
-            if "videoRenderer" in video.keys():
-                # Get current video
-                curr_video = video.get("videoRenderer", {})
+            if c <= self.max_results:
+                if "videoRenderer" in video.keys():
+                    # Get current video
+                    curr_video = video.get("videoRenderer", {})
 
-                # Get Title from current video
-                title = (
-                    curr_video.get("title", {}).get("runs", [[{}]])[0].get("text", "NA")
-                )
-                output["Title"] = title
-                metadata += f"Title : {title}\n"
+                    # Get Title from current video
+                    title = (
+                        curr_video.get("title", {})
+                        .get("runs", [[{}]])[0]
+                        .get("text", "NA")
+                    )
+                    output["Title"] = title
+                    metadata += f"Title : {title}\n"
 
-                # Get channel name from current video
-                channel_name = (
-                    curr_video.get("longBylineText", {})
-                    .get("runs", [[{}]])[0]
-                    .get("text", "NA")
-                )
-                output["Channel"] = channel_name
-                metadata += f"Channel Name : {channel_name}\n"
+                    # Get channel name from current video
+                    channel_name = (
+                        curr_video.get("longBylineText", {})
+                        .get("runs", [[{}]])[0]
+                        .get("text", "NA")
+                    )
+                    output["Channel"] = channel_name
+                    metadata += f"Channel Name : {channel_name}\n"
 
-                # Get duration from current video
-                duration = curr_video.get("lengthText", {}).get("simpleText", 0)
-                output["Duration"] = duration
-                metadata += f"Duration : {duration}\n"
+                    # Get duration from current video
+                    duration = curr_video.get("lengthText", {}).get("simpleText", 0)
+                    output["Duration"] = duration
+                    metadata += f"Duration : {duration}\n"
 
-                # Get total views from current video
-                views = curr_video.get("shortViewCountText", {}).get("simpleText", "NA")
-                output["Views"] = views
-                metadata += f"Views : {views}\n"
+                    # Get total views from current video
+                    views = curr_video.get("shortViewCountText", {}).get(
+                        "simpleText", "NA"
+                    )
+                    output["Views"] = views
+                    metadata += f"Views : {views}\n"
 
-                # Get upload date from current video
-                upload_date = curr_video.get("publishedTimeText", {}).get(
-                    "simpleText", "NA"
-                )
-                output["Uploaded"] = upload_date
-                metadata += f"Upload Date : {upload_date}\n"
+                    # Get upload date from current video
+                    upload_date = curr_video.get("publishedTimeText", {}).get(
+                        "simpleText", "NA"
+                    )
+                    output["Uploaded"] = upload_date
+                    metadata += f"Upload Date : {upload_date}\n"
 
-                # Get url from current video
-                url_ = (
-                    curr_video.get("navigationEndpoint", {})
-                    .get("commandMetadata", {})
-                    .get("webCommandMetadata", {})
-                    .get("url", "NA")
-                )
-                output["Link"] = "https://www.youtube.com" + url_
-                metadata += f"Link : {output['Link']}\n"
+                    # Get url from current video
+                    url_ = (
+                        curr_video.get("navigationEndpoint", {})
+                        .get("commandMetadata", {})
+                        .get("webCommandMetadata", {})
+                        .get("url", "NA")
+                    )
+                    output["Link"] = "https://www.youtube.com" + url_
+                    metadata += f"Link : {output['Link']}\n"
 
-                # Get Thumbnails from current video [Future Release]
-                thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
-                tmp = []
-                for t in thumbnails:
-                    tmp.append(t["url"])
-                output["Thumbnails"] = tmp[0]
-                location = self.download(tmp[0], "\n\n" + metadata)
-                output["Location"] = location
+                    # Get Thumbnails from current video [Future Release]
+                    thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
+                    tmp = []
+                    for t in thumbnails:
+                        tmp.append(t["url"])
+                    output["Thumbnails"] = tmp[0]
+                    location = self.download(tmp[0], "\n\n" + metadata)
+                    output["Location"] = location
 
-                metadata = ""
-                del tmp
+                    metadata = ""
+                    del tmp
 
-                # Append current video to the final master list
-                final.append(output)
+                    # Append current video to the final master list
+                    final.append(output)
+                    c += 1
         return final
 
     def get_dict(self):
@@ -210,7 +218,7 @@ thumbDir = os.path.expanduser("~/.cache/thumbs")
 os.system(f"rm -rf {thumbDir};mkdir -p {thumbDir}")
 
 # Call the class
-obj = searchYouTube(args.q, 15, args.algo)
+obj = searchYouTube(args.q, 20, args.algo)
 
 # Get json and store it in the user folder
 jsonString = json.dumps(obj.get_dict(), indent=4)
