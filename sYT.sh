@@ -2,7 +2,7 @@
 
 # Progress bar
 function progress ()
-{    
+{
     # Start Scraping data
     BLUE='\033[0;34m'
     echo ""
@@ -19,7 +19,7 @@ function progress ()
 
 # Pretty print data functions
 function jsonArrayToTable(){
-     jq -r '(["Channel","Duration","Views","Uploaded","Title","Link","Location"] | (., map(length*"-"))), (.[] | [.Channel, .Duration,.Views,.Uploaded,.Title,.Link,.Location]) | @tsv' | column -t -s $'\t' | sed "1,2d"
+    jq -r '(["Channel","Duration","Views","Uploaded","Title","Link","Location"] | (., map(length*"-"))), (.[] | [.Channel, .Duration,.Views,.Uploaded,.Title,.Link,.Location]) | @tsv' | column -t -s $'\t' | sed "1,2d"
 }
 
 # Pretty print data functions dmenu
@@ -46,7 +46,7 @@ stop_ueberzug() {
 
 preview_img() {
     [ -d "$1" ] && echo "$1 is a directory" ||
-        printf '%s\n' '{"action": "add", "identifier": "image-preview", "path": "'"$1"'", "x": "2", "y": "1", "width": "'"$FZF_PREVIEW_COLUMNS"'", "height": "'"$FZF_PREVIEW_LINES"'"}' >"$FIFO"
+    printf '%s\n' '{"action": "add", "identifier": "image-preview", "path": "'"$1"'", "x": "2", "y": "1", "width": "'"$FZF_PREVIEW_COLUMNS"'", "height": "'"$FZF_PREVIEW_LINES"'"}' >"$FIFO"
     metadata="$(cat "$1"|tail -7)"
     printf "\n\n\n\n\n\n\n\n\n\n\n\n\n"
     echo "$metadata"
@@ -68,17 +68,18 @@ mav=""
 
 usage()
 {
-cat << EOF
+    cat << EOF
 
 ### ONLY WATCH VIDEOS
 Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
 Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
+Example 2: sYT.sh -p "bemenu"    [Watch videos with bemenu as provider]
 
 
 #### DOWNLOAD BY SEARCHING VIDEOS
 Note : For downloading -d flag must be given as true for downloading searched videos.
 
--p    | --provider      Fzf or Dmenu
+-p    | --provider      Fzf or Dmenu or Bemenu
 -d    | --download      Download searched video (true or false) [Only download do not play the video]
 -ml   | --multilink     Download multiple youtube videos fzf as provider.
 
@@ -104,50 +105,50 @@ Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
 
 Example 4: sYT.sh -d "true" -mav "true"
 
--h   | --help          Prints help 
+-h   | --help          Prints help
 EOF
 }
 
 while [[ $# > 0 ]]
 do
-        case "$1" in
+    case "$1" in
 
-                -p|--provider)
-                        provider="$2"
-                        shift
-                        ;;
+        -p|--provider)
+            provider="$2"
+            shift
+            ;;
 
-                -d|--download)
-                        download="$2"
-                        shift
-                        ;;
-                -dl|--dlink)
-                        dlink="$2"
-                        shift
-                        ;;
-                -fl|--flink)
-                        flink="$2"
-                        shift
-                        ;;
-                -flm|--flinkmulti)
-                        flinkmulti="$2"
-                        shift
-                        ;;
-                -ml|--multilink)
-                        multilink="$2"
-                        shift
-                        ;;
-                -mav|--mergeaudvid)
-                        mav="$2"
-                        shift
-                        ;;
+        -d|--download)
+            download="$2"
+            shift
+            ;;
+        -dl|--dlink)
+            dlink="$2"
+            shift
+            ;;
+        -fl|--flink)
+            flink="$2"
+            shift
+            ;;
+        -flm|--flinkmulti)
+            flinkmulti="$2"
+            shift
+            ;;
+        -ml|--multilink)
+            multilink="$2"
+            shift
+            ;;
+        -mav|--mergeaudvid)
+            mav="$2"
+            shift
+            ;;
 
-                --help|*)
-                        usage
-                        exit 1
-                        ;;
-        esac
-        shift
+        --help|*)
+            usage
+            exit 1
+            ;;
+    esac
+    shift
 done
 
 if [[ "$provider" = "dmenu" ]]; then
@@ -158,7 +159,7 @@ if [[ "$provider" = "dmenu" ]]; then
         if [[ "$dlink" != "" ]]; then
             yt-dlp -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
             notify-send "Started Downloading ..."
-        else 
+        else
             notify-send "No link Given"
         fi
 
@@ -186,18 +187,55 @@ if [[ "$provider" = "dmenu" ]]; then
         fi
     fi
 
+elif [[ "$provider" = "bemenu" ]]; then
+    if [[ "$dlink" = "true" ]]; then
+        # Get video link
+        dlink=$(echo >/dev/null |bemenu -p "Paste video link with ctrl+shift+y :")
+        # Check if any link given
+        if [[ "$dlink" != "" ]]; then
+            yt-dlp -F "$dlink" | sed '3,$!d' | bemenu -l 20 -p "Choose :"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
+            notify-send "Started Downloading ..."
+        else
+            notify-send "No link Given"
+        fi
+
+    else
+        # Read user query
+        query=$(echo >/dev/null |bemenu -p "Search query :")
+
+        # Get data
+        if [[ "$query" ]]; then
+            python ~/.local/bin/sYT.py -q "$query";
+            if [[ "$download" = "false" ]]; then
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |bemenu -l 20 -p "Find:" -i)
+                videoInfo=$(echo "$selectedVideo"|xargs)
+                currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
+                setsid -f mpv "$currLink" > /dev/null 2>&1
+                clear
+                printf "Now Playing : \n$videoInfo"
+                echo ""
+                $0
+
+            else
+                link=$(cat ~/.cache/data.json | jsonArrayToTabled |bemenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
+                yt-dlp -F "$link" | sed '3,$!d' | bemenu -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+            fi
+        fi
+    fi
+
+
 elif [[ "$provider" = "fzf" ]]; then
     # Check if any link given
     if [[ "$flink" != "" ]]; then
         yt-dlp -F "$flink" | sed '3,$!d' | fzf --prompt="Choose :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$flink"
     elif [[ "$flinkmulti" != "" ]]; then
         my_links=$(echo $flinkmulti | tr " " "\n")
-         yt-dlp -f best --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" $my_links
+        yt-dlp -f best --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" $my_links
     else
         # Read user query
         read -p $'\e[31mSearch query\e[0m :' query
 
-        # Show progress 
+        # Show progress
         progress
 
         # Get data
@@ -207,10 +245,10 @@ elif [[ "$provider" = "fzf" ]]; then
             start_ueberzug
             selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
             stop_ueberzug
-            
+
             videoInfo=$(echo "$selectedVideo"|xargs)
             currLink=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev)
-            
+
             setsid -f mpv "$currLink" > /dev/null 2>&1
             clear
             printf "Now Playing : \n$videoInfo"
@@ -248,14 +286,14 @@ elif [[ "$provider" = "fzf" ]]; then
                 start_ueberzug
                 selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
-                
+
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
                 my_array=($(echo $link | tr " " "\n"))
                 c=1
                 for i in "${my_array[@]}"
-                    do
-                        yt-dlp -F "$i" | sed '1,5d'| grep -v "images" | grep -v "video only" | grep -v "audio only" | fzf --cycle --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
-                        ((c++))
+                do
+                    yt-dlp -F "$i" | sed '1,5d'| grep -v "images" | grep -v "video only" | grep -v "audio only" | fzf --cycle --prompt="Choose Quality for video number $c :" --reverse | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$i"
+                    ((c++))
                 done
             else
                 start_ueberzug
