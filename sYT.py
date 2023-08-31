@@ -1,4 +1,5 @@
 import requests
+import threading
 import json
 import argparse
 import os
@@ -52,24 +53,47 @@ class searchYouTube:
             return results[: self.max_results]
         return results
 
-    def download(self, url, metadata):
+    def download(self, url, metadata, final=None, idx=None):
         thumbDir = os.path.expanduser("~/.cache/thumbs")
         file_name = str(time.time())
         full_path = thumbDir + "/" + file_name + ".png"
+
+        if idx and final:
+            final[idx]["Location"] = full_path
+
         urllib.request.urlretrieve(url, full_path)
         metadata += f"Thumbnail : {full_path}\n"
 
         with open(f"{full_path}", "a+") as f:
             f.write(metadata)
 
-        return full_path
+        if idx >= 0 and final:
+            final[idx]["Location"] = full_path
+
+    def startThumbnailJob(self, thumburl, meta, final):
+        threads = []
+
+        for i in range(len(thumburl)):
+            thread = threading.Thread(
+                target=self.download, args=(thumburl[i], meta[i], final, i)
+            )
+            thread.start()
+            threads.append(thread)
+
+        for thread in threads:
+            thread.join()
 
     def parseV2(self):
-        base_url = "https://inv.riverside.rocks"
+        base_url = "https://invidious.fdn.fr"
         searchEndpoint = f"{base_url}/api/v1/search?q={self.search_term}"
-        videos = requests.get(searchEndpoint).json()
+        response = requests.get(searchEndpoint)
+        videos = json.loads(response.content)
         final = []
         c = 0
+
+        # Thumnail Jobs
+        thumburl = []
+        meta = []
 
         for video in videos:
             if c <= self.max_results:
@@ -100,13 +124,16 @@ class searchYouTube:
                     tmp["Link"] = videoId
                     metadata += f"Link : {tmp['Link']}\n"
 
-                    tmp["Thumbnail"] = video["videoThumbnails"][0]["url"]
-
-                    location = self.download(tmp["Thumbnail"], "\n\n" + metadata)
-                    tmp["Location"] = location
+                    tmp["Thumbnail"] = video["videoThumbnails"][4]["url"]
+                    thumburl.append(tmp["Thumbnail"])
+                    meta.append("\n\n" + metadata)
+                    tmp["Location"] = ""
 
                     final.append(tmp)
                     c += 1
+
+        self.startThumbnailJob(thumburl, meta, final)
+
         return final
 
     def parseV1(self, response):
@@ -124,6 +151,10 @@ class searchYouTube:
 
         #  Master list containing all the info about the videos
         final = []
+
+        # Thumnail Jobs
+        thumburl = []
+        meta = []
 
         metadata = ""
         for video in videos:
@@ -181,14 +212,15 @@ class searchYouTube:
                     output["Link"] = "https://www.youtube.com" + url_
                     metadata += f"Link : {output['Link']}\n"
 
-                    # Get Thumbnails from current video [Future Release]
+                    # Get Thumbnails from current video
                     thumbnails = curr_video.get("thumbnail", {}).get("thumbnails", {})
                     tmp = []
                     for t in thumbnails:
                         tmp.append(t["url"])
                     output["Thumbnails"] = tmp[0]
-                    location = self.download(tmp[0], "\n\n" + metadata)
-                    output["Location"] = location
+                    thumburl.append(output["Thumbnails"])
+                    meta.append("\n\n" + metadata)
+                    output["Location"] = ""
 
                     metadata = ""
                     del tmp
@@ -196,6 +228,9 @@ class searchYouTube:
                     # Append current video to the final master list
                     final.append(output)
                     c += 1
+
+        self.startThumbnailJob(thumburl, meta, final)
+
         return final
 
     def get_dict(self):
@@ -207,10 +242,10 @@ parser = argparse.ArgumentParser()
 
 # Add query to search
 parser.add_argument("-q", type=str, default="neovim", help="Query to search.")
-args = parser.parse_args()
 
 # Algorithm to Use
-parser.add_argument("-algo", type=str, default="v1", help="Algo to use v1 v2.")
+parser.add_argument("-a", type=str, default="v2", help="Algo to use v1 or v2")
+
 args = parser.parse_args()
 
 # Delete Cached Thumbnails
@@ -218,7 +253,7 @@ thumbDir = os.path.expanduser("~/.cache/thumbs")
 os.system(f"rm -rf {thumbDir};mkdir -p {thumbDir}")
 
 # Call the class
-obj = searchYouTube(args.q, 20, args.algo)
+obj = searchYouTube(args.q, 20, args.a)
 
 # Get json and store it in the user folder
 jsonString = json.dumps(obj.get_dict(), indent=4)

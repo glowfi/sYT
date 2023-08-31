@@ -1,24 +1,41 @@
 # sYT
 
-> search,watch and download YouTube videos from terminal without youtube API or just use as youtube downloader.
+![IMAGE1](./demo.png)
 
-## Description
-
--   [syt.py](https://github.com/glowfi/sYT/blob/main/sYT.py) scrapes youtube data and returns json (Can be used as a seperate library to get info about youtube videos).
--   [sYT.sh](https://github.com/glowfi/sYT/blob/main/sYT.sh) parses the output from [sYT.py](https://github.com/glowfi/sYT/blob/main/sYT.py).
+> Search , Watch and Download YouTube videos from terminal without youtube API
 
 ## Dependencies
 
 -   python 3.5+ (For scrapping data)
 -   fzf or dmenu (For menu)
--   mpv (For playing video)
--   yt-dlp (For downloading videos)
--   aria2c (For downloading videos)
 -   jq (For formatting json)
+-   mpv (For playing video)
+-   yt-dlp (For getting video qualities)
+-   aria2c (For downloading videos)
 
 ## Installation
 
-**INSTALL**
+#### Add Path
+
+> Must add ~/.local/bin to your shell path
+
+Example how to add ~/.local/bin/ in the PATH Variable <br>
+
+<b>POSIX based shell (bash,zsh,dash,....) </b>
+
+<em>Change bashrc to your repective shell's rc</em>
+
+```
+echo 'export PATH=~/.local/bin:$PATH' >> $HOME/.bashrc
+```
+
+<b>Fish shell </b>
+
+```
+echo 'set PATH ~/.local/bin/ $PATH' >> $HOME/.config/fish/config.fish
+```
+
+#### Install in one go
 
 ```sh
 
@@ -35,13 +52,21 @@ chmod +x ~/.local/bin/sYT.sh
 
 ```
 
-**EXECUTE**
+## How to Use
 
 ```sh
+
+### Algorithms
++ algov1 -> No dependencies pure web scraping (slow)
++ algov2 -> Uses invidious youtube api (fast) (default)
 
 ### ONLY WATCH VIDEOS
 Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
 Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
+
+### USING SPECIFIC ALGOS
+Example 1: sYT.sh -a "v1"       [Use algov1]
+Example 2: sYT.sh -a "v2"    [Use algov2]
 
 
 #### DOWNLOAD BY SEARCHING VIDEOS
@@ -76,7 +101,3 @@ Example 4: sYT.sh -d "true" -mav "true"
 -h   | --help          Prints help
 
 ```
-
-**NOTE**
-
-**Try creating an alias in your shell as sYT (not sh\*t) for this program**

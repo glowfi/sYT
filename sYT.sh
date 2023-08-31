@@ -65,21 +65,29 @@ flinkmulti=""
 dlink="false"
 multilink=""
 mav=""
+algo="v2"
 
 usage()
 {
     cat << EOF
 
+### Algorithms
++ algov1 -> No dependencies pure web scraping (slow)
++ algov2 -> Uses invidious youtube api (fast) (default)
+
 ### ONLY WATCH VIDEOS
 Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
 Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
-Example 2: sYT.sh -p "bemenu"    [Watch videos with bemenu as provider]
+
+### USING SPECIFIC ALGOS
+Example 1: sYT.sh -a "v1"       [Use algov1]
+Example 2: sYT.sh -a "v2"    [Use algov2]
 
 
 #### DOWNLOAD BY SEARCHING VIDEOS
 Note : For downloading -d flag must be given as true for downloading searched videos.
 
--p    | --provider      Fzf or Dmenu or Bemenu
+-p    | --provider      Fzf or Dmenu
 -d    | --download      Download searched video (true or false) [Only download do not play the video]
 -ml   | --multilink     Download multiple youtube videos fzf as provider.
 
@@ -115,6 +123,11 @@ do
 
         -p|--provider)
             provider="$2"
+            shift
+            ;;
+
+        -a|--algo)
+            algo="$2"
             shift
             ;;
 
@@ -169,7 +182,7 @@ if [[ "$provider" = "dmenu" ]]; then
 
         # Get data
         if [[ "$query" ]]; then
-            python ~/.local/bin/sYT.py -q "$query";
+            python ~/.local/bin/sYT.py -q "$query" -a "$algo";
             if [[ "$download" = "false" ]]; then
                 selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i)
                 videoInfo=$(echo "$selectedVideo"|xargs)
@@ -187,43 +200,6 @@ if [[ "$provider" = "dmenu" ]]; then
         fi
     fi
 
-elif [[ "$provider" = "bemenu" ]]; then
-    if [[ "$dlink" = "true" ]]; then
-        # Get video link
-        dlink=$(echo >/dev/null |bemenu -p "Paste video link with ctrl+shift+y :")
-        # Check if any link given
-        if [[ "$dlink" != "" ]]; then
-            yt-dlp -F "$dlink" | sed '3,$!d' | bemenu -l 20 -p "Choose :"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
-            notify-send "Started Downloading ..."
-        else
-            notify-send "No link Given"
-        fi
-
-    else
-        # Read user query
-        query=$(echo >/dev/null |bemenu -p "Search query :")
-
-        # Get data
-        if [[ "$query" ]]; then
-            python ~/.local/bin/sYT.py -q "$query";
-            if [[ "$download" = "false" ]]; then
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |bemenu -l 20 -p "Find:" -i)
-                videoInfo=$(echo "$selectedVideo"|xargs)
-                currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
-                setsid -f mpv "$currLink" > /dev/null 2>&1
-                clear
-                printf "Now Playing : \n$videoInfo"
-                echo ""
-                $0
-
-            else
-                link=$(cat ~/.cache/data.json | jsonArrayToTabled |bemenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
-                yt-dlp -F "$link" | sed '3,$!d' | bemenu -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
-            fi
-        fi
-    fi
-
-
 elif [[ "$provider" = "fzf" ]]; then
     # Check if any link given
     if [[ "$flink" != "" ]]; then
@@ -239,7 +215,7 @@ elif [[ "$provider" = "fzf" ]]; then
         progress
 
         # Get data
-        python ~/.local/bin/sYT.py -q "$query";
+        python ~/.local/bin/sYT.py -q "$query" -a "$algo";
         if [[ "$download" = "false" ]]; then
 
             start_ueberzug
