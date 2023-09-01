@@ -117,7 +117,7 @@ class searchYouTube:
                     metadata += f"Views : {tmp['Views']}\n"
 
                     tmp["Uploaded"] = time.strftime(
-                        "%a, %d %b %Y %H:%M:%S %Z", time.localtime(video["published"])
+                        "%a, %d %b %Y %H:%M:%S", time.localtime(video["published"])
                     )
                     metadata += f"Upload Date : {tmp['Uploaded']}\n"
 
