@@ -56,8 +56,9 @@ chmod +x ~/.local/bin/sYT.sh
 
 ```sh
 
+
 ### Algorithms
-+ algov1 -> No dependencies pure web scraping (slow)
++ algov1 -> No dependencies pure web scraping and uses only inbuilt python libraries (slow)
 + algov2 -> Uses invidious youtube api (fast) (default)
 
 ### ONLY WATCH VIDEOS
