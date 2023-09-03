@@ -41,7 +41,7 @@ echo 'set PATH ~/.local/bin/ $PATH' >> $HOME/.config/fish/config.fish
 <em>The original ueberzug project has been abandoned by its original author.
 But there are some people who are continuing its legacy.
 You can install ueberzug by using the below commands.
-I know projects like `uebezugpp` exists but for now
+I know projects like `ueberzugpp` exists but for now
 my project supports only `ueberzug` backend
 to display images.</em>
 
