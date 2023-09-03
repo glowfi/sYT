@@ -7,6 +7,7 @@
 ## Dependencies
 
 -   python 3.5+ (For scrapping data)
+-   ueberzug (For displaying images)
 -   fzf or dmenu (For menu)
 -   jq (For formatting json)
 -   mpv (For playing video)
@@ -35,7 +36,24 @@ echo 'export PATH=~/.local/bin:$PATH' >> $HOME/.bashrc
 echo 'set PATH ~/.local/bin/ $PATH' >> $HOME/.config/fish/config.fish
 ```
 
-#### Install in one go
+#### Install ueberzug guide
+
+<em>The original ueberzug project has been abandoned by its original author.
+But there are some people who are continuing its legacy.
+You can install ueberzug by using the below commands.
+I know projects like `uebezugpp` exists but for now
+my project supports only `ueberzug` backend
+to display images.</em>
+
+```sh
+git clone https://github.com/ueber-devel/ueberzug;
+cd ueberzug/
+pip install .
+cd ..
+rm -rf ueberzug
+```
+
+#### Install script
 
 ```sh
 
