@@ -187,8 +187,7 @@ if [[ "$provider" = "dmenu" ]]; then
                 selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i)
                 videoInfo=$(echo "$selectedVideo"|xargs)
                 currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
-                nohup "$currLink" &
-                rm nohup.out
+                setsid -f mpv "$currLink" > /dev/null 2>&1
                 clear
                 printf "Now Playing : \n$videoInfo"
                 echo ""
@@ -226,8 +225,7 @@ elif [[ "$provider" = "fzf" ]]; then
             videoInfo=$(echo "$selectedVideo"|xargs)
             currLink=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev)
 
-            nohup "$currLink" &
-            rm nohup.out
+            setsid -f mpv "$currLink" > /dev/null 2>&1
             clear
             printf "Now Playing : \n$videoInfo"
             echo ""
