@@ -165,11 +165,11 @@ do
     shift
 done
 
-if [[ "$provider" = "dmenu" | "$provider" = "bemenu" ]]; then
+if [[ "$provider" = "dmenu" || "$provider" = "bemenu" ]]; then
     currProvider="${provider}"
     if [[ "$dlink" = "true" ]]; then
         # Get video link
-        dlink=$(echo >/dev/null |"${currProvider}" -p "Paste video link with ctrl+shift+y :")
+        dlink=$(echo >/dev/null | "${currProvider}" -p "Paste video link with ctrl+shift+y :")
         # Check if any link given
         if [[ "$dlink" != "" ]]; then
             yt-dlp -F "$dlink" | sed '3,$!d' | "${currProvider}" -l 20 -p "Choose :"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
@@ -180,13 +180,13 @@ if [[ "$provider" = "dmenu" | "$provider" = "bemenu" ]]; then
 
     else
         # Read user query
-        query=$(echo >/dev/null |"${currProvider}" -p "Search query :")
+        query=$(echo >/dev/null | "${currProvider}" -p "Search query :")
 
         # Get data
         if [[ "$query" ]]; then
             python ~/.local/bin/sYT.py -q "$query" -a "$algo";
             if [[ "$download" = "false" ]]; then
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |"${currProvider}" -l 20 -p "Find:" -i)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled | "${currProvider}" -l 20 -p "Find:" -i)
                 videoInfo=$(echo "$selectedVideo"|xargs)
                 currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
                 setsid -f mpv "$currLink" > /dev/null 2>&1
@@ -196,7 +196,7 @@ if [[ "$provider" = "dmenu" | "$provider" = "bemenu" ]]; then
                 $0
 
             else
-                link=$(cat ~/.cache/data.json | jsonArrayToTabled |"${currProvider}" -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
+                link=$(cat ~/.cache/data.json | jsonArrayToTabled | "${currProvider}" -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
                 yt-dlp -F "$link" | sed '3,$!d' | "${currProvider}" -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
