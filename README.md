@@ -86,7 +86,6 @@ chmod +x ~/.local/bin/sYT.sh
 ### ONLY WATCH VIDEOS
 Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
 Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
-Example 2: sYT.sh -p "bemenu"     [Watch videos with bemenu as provider]
 
 ### USING SPECIFIC ALGOS
 Example 1: sYT.sh -a "v1"       [Use algov1]
@@ -96,7 +95,7 @@ Example 2: sYT.sh -a "v2"    [Use algov2]
 #### DOWNLOAD BY SEARCHING VIDEOS
 Note : For downloading -d flag must be given as true for downloading searched videos.
 
--p    | --provider      fzf or dmenu or bemenu
+-p    | --provider      fzf or dmenu
 -d    | --download      Download searched video (true or false) [Only download do not play the video]
 -ml   | --multilink     Download multiple youtube videos fzf as provider.
 
@@ -107,7 +106,7 @@ Example 2: sYT.sh -d  "true" -p "fzf" -ml "true" [Download multiple searched vid
 #### DOWNLOAD BY PASSING LINKS AS ARGUMENTS
 Note : For downloading videos directly by passing link as arguments.
 
--dl   | --dlink         Download any youtube video with a single link dmenu or bemenu as provider.
+-dl   | --dlink         Download any youtube video with a single link dmenu as provider.
 -fl   | --flink         Download any youtube video with a single link fzf as provider.
 -flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
 -mav  | --mergeaudvid   Merge audio and video with fzf as provider.
@@ -116,7 +115,7 @@ Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as a
 
 Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf" [Pass multi link as argument if u want to uses fzf]
 
-Note :  Dmenu or bemenu will ask you to paste the link in the prompt.Pass true or false for dl
+Note :  Dmenu will ask you to paste the link in the prompt.Pass true or false for dl
 
 Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
 

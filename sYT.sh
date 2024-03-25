@@ -78,7 +78,6 @@ usage()
 ### ONLY WATCH VIDEOS
 Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
 Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
-Example 2: sYT.sh -p "bemenu"     [Watch videos with bemenu as provider]
 
 ### USING SPECIFIC ALGOS
 Example 1: sYT.sh -a "v1"       [Use algov1]
@@ -88,7 +87,7 @@ Example 2: sYT.sh -a "v2"    [Use algov2]
 #### DOWNLOAD BY SEARCHING VIDEOS
 Note : For downloading -d flag must be given as true for downloading searched videos.
 
--p    | --provider      fzf or dmenu or bemenu
+-p    | --provider      fzf or dmenu
 -d    | --download      Download searched video (true or false) [Only download do not play the video]
 -ml   | --multilink     Download multiple youtube videos fzf as provider.
 
@@ -99,7 +98,7 @@ Example 2: sYT.sh -d  "true" -p "fzf" -ml "true" [Download multiple searched vid
 #### DOWNLOAD BY PASSING LINKS AS ARGUMENTS
 Note : For downloading videos directly by passing link as arguments.
 
--dl   | --dlink         Download any youtube video with a single link dmenu or bemenu as provider.
+-dl   | --dlink         Download any youtube video with a single link dmenu as provider.
 -fl   | --flink         Download any youtube video with a single link fzf as provider.
 -flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
 -mav  | --mergeaudvid   Merge audio and video with fzf as provider.
@@ -108,7 +107,7 @@ Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as a
 
 Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf" [Pass multi link as argument if u want to uses fzf]
 
-Note :  Dmenu or bemenu will ask you to paste the link in the prompt.Pass true or false for dl
+Note :  Dmenu will ask you to paste the link in the prompt.Pass true or false for dl
 
 Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
 
@@ -165,14 +164,13 @@ do
     shift
 done
 
-if [[ "$provider" = "dmenu" || "$provider" = "bemenu" ]]; then
-    currProvider="${provider}"
+if [[ "$provider" = "dmenu" ]]; then
     if [[ "$dlink" = "true" ]]; then
         # Get video link
-        dlink=$(echo >/dev/null |"${currProvider}" -p "Paste video link with ctrl+shift+y :")
+        dlink=$(echo >/dev/null |dmenu -p "Paste video link with ctrl+shift+y :")
         # Check if any link given
         if [[ "$dlink" != "" ]]; then
-            yt-dlp -F "$dlink" | sed '3,$!d' | "${currProvider}" -l 20 -p "Choose :"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
+            yt-dlp -F "$dlink" | sed '3,$!d' | dmenu -l 20 -p "Choose :"  | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$dlink"
             notify-send "Started Downloading ..."
         else
             notify-send "No link Given"
@@ -180,24 +178,25 @@ if [[ "$provider" = "dmenu" || "$provider" = "bemenu" ]]; then
 
     else
         # Read user query
-        query=$(echo >/dev/null |"${currProvider}" -p "Search query :")
+        query=$(echo >/dev/null |dmenu -p "Search query :")
 
         # Get data
         if [[ "$query" ]]; then
             python ~/.local/bin/sYT.py -q "$query" -a "$algo";
             if [[ "$download" = "false" ]]; then
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |"${currProvider}" -l 20 -p "Find:" -i)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i)
                 videoInfo=$(echo "$selectedVideo"|xargs)
                 currLink=$(echo "$selectedVideo"|awk '{print $NF}' | sed '1s/^.//')
-                setsid -f mpv "$currLink" > /dev/null 2>&1
+                nohup "$currLink" &
+                rm nohup.out
                 clear
                 printf "Now Playing : \n$videoInfo"
                 echo ""
                 $0
 
             else
-                link=$(cat ~/.cache/data.json | jsonArrayToTabled |"${currProvider}" -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
-                yt-dlp -F "$link" | sed '3,$!d' | "${currProvider}" -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
+                link=$(cat ~/.cache/data.json | jsonArrayToTabled |dmenu -l 20 -p "Find:" -i | awk '{print $NF}' | sed '1s/^.//')
+                yt-dlp -F "$link" | sed '3,$!d' | dmenu -l 20 -p "Choose :" | awk '{print $1}' | xargs -t -I {} yt-dlp -f {} --external-downloader aria2c --external-downloader-args "-j 16 -x 16 -s 16 -k 1M" "$link"
             fi
         fi
     fi
@@ -227,7 +226,8 @@ elif [[ "$provider" = "fzf" ]]; then
             videoInfo=$(echo "$selectedVideo"|xargs)
             currLink=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev)
 
-            setsid -f mpv "$currLink" > /dev/null 2>&1
+            nohup "$currLink" &
+            rm nohup.out
             clear
             printf "Now Playing : \n$videoInfo"
             echo ""
