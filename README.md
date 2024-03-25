@@ -36,21 +36,26 @@ echo 'export PATH=~/.local/bin:$PATH' >> $HOME/.bashrc
 echo 'set PATH ~/.local/bin/ $PATH' >> $HOME/.config/fish/config.fish
 ```
 
-#### Install ueberzug guide
+### Ueberzugpp installation guide
 
-<em>The original ueberzug project has been abandoned by its original author.
-But there are some people who are continuing its legacy.
-You can install ueberzug by using the below commands.
-I know projects like `ueberzugpp` exists but for now
-my project supports only `ueberzug` backend
-to display images.</em>
+**Install Build Dependencies**
 
 ```sh
-git clone https://github.com/ueber-devel/ueberzug;
-cd ueberzug/
-pip install .
-cd ..
-rm -rf ueberzug
+libxres openslide cmake chafa libvips libsixel python-opencv
+```
+
+**Start Build**
+
+After building you will see a binary called `ueberzugpp` in your build directory
+
+```sh
+pip uninstall -y cmake
+git clone "https://github.com/jstkdng/ueberzugpp.git"
+cd ueberzugpp
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build .
+mv ./ueberzug ./ueberzugpp
 ```
 
 #### Install script
@@ -74,7 +79,6 @@ chmod +x ~/.local/bin/sYT.sh
 
 ```sh
 
-
 ### Algorithms
 + algov1 -> No dependencies pure web scraping and uses only inbuilt python libraries (slow)
 + algov2 -> Uses invidious youtube api (fast) (default)
@@ -82,6 +86,7 @@ chmod +x ~/.local/bin/sYT.sh
 ### ONLY WATCH VIDEOS
 Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
 Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
+Example 2: sYT.sh -p "bemenu"     [Watch videos with bemenu as provider]
 
 ### USING SPECIFIC ALGOS
 Example 1: sYT.sh -a "v1"       [Use algov1]
@@ -91,7 +96,7 @@ Example 2: sYT.sh -a "v2"    [Use algov2]
 #### DOWNLOAD BY SEARCHING VIDEOS
 Note : For downloading -d flag must be given as true for downloading searched videos.
 
--p    | --provider      Fzf or Dmenu
+-p    | --provider      fzf or dmenu or bemenu
 -d    | --download      Download searched video (true or false) [Only download do not play the video]
 -ml   | --multilink     Download multiple youtube videos fzf as provider.
 
@@ -102,7 +107,7 @@ Example 2: sYT.sh -d  "true" -p "fzf" -ml "true" [Download multiple searched vid
 #### DOWNLOAD BY PASSING LINKS AS ARGUMENTS
 Note : For downloading videos directly by passing link as arguments.
 
--dl   | --dlink         Download any youtube video with a single link dmenu as provider.
+-dl   | --dlink         Download any youtube video with a single link dmenu or bemenu as provider.
 -fl   | --flink         Download any youtube video with a single link fzf as provider.
 -flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
 -mav  | --mergeaudvid   Merge audio and video with fzf as provider.
@@ -111,7 +116,7 @@ Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as a
 
 Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf" [Pass multi link as argument if u want to uses fzf]
 
-Note :  Dmenu will ask you to paste the link in the prompt.Pass true or false for dl
+Note :  Dmenu or bemenu will ask you to paste the link in the prompt.Pass true or false for dl
 
 Example 3: sYT.sh -p "dmenu" -dl "true" [Dmenu supports only single link]
 
