@@ -84,7 +84,7 @@ class searchYouTube:
             thread.join()
 
     def parseV2(self):
-        base_url = "https://invidious.fdn.fr"
+        base_url = "https://invidious.jing.rocks"
         searchEndpoint = f"{base_url}/api/v1/search?q={self.search_term}"
         response = requests.get(searchEndpoint)
         videos = json.loads(response.content)
