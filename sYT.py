@@ -244,7 +244,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-q", type=str, default="neovim", help="Query to search.")
 
 # Algorithm to Use
-parser.add_argument("-a", type=str, default="v2", help="Algo to use v1 or v2")
+parser.add_argument("-a", type=str, default="v1", help="Algo to use v1 or v2")
 
 args = parser.parse_args()
 

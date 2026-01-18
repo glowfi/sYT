@@ -65,7 +65,7 @@ flinkmulti=""
 dlink="false"
 multilink=""
 mav=""
-algo="v2"
+algo="v1"
 
 usage()
 {
@@ -221,7 +221,7 @@ elif [[ "$provider" = "fzf" ]]; then
         if [[ "$download" = "false" ]]; then
 
             start_ueberzug
-            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+            selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
             stop_ueberzug
 
             videoInfo=$(echo "$selectedVideo"|xargs)
@@ -236,7 +236,7 @@ elif [[ "$provider" = "fzf" ]]; then
         else
             if [[ "$mav" == "true" ]]; then
                 start_ueberzug
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle --prompt="Find :" --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
 
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
@@ -262,7 +262,7 @@ elif [[ "$provider" = "fzf" ]]; then
 
             elif [[ "$multilink" == "true" ]]; then
                 start_ueberzug
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
 
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
@@ -275,7 +275,7 @@ elif [[ "$provider" = "fzf" ]]; then
                 done
             else
                 start_ueberzug
-                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --color=16 --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
+                selectedVideo=$(cat ~/.cache/data.json | jsonArrayToTable | fzf --cycle -m --prompt="Find :" --preview-window="left:50%:wrap" --reverse --preview "echo {}|rev|cut -d' ' -f 1|rev|xargs -I {} sh $0 preview_img {}" || stop_ueberzug)
                 stop_ueberzug
 
                 link=$(echo "$selectedVideo"|rev|awk -F" " '{print $2}'|rev|xargs)
