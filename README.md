@@ -1,56 +1,94 @@
-# sYT
+<div align="center">
 
-![IMAGE1](./demo.png)
+# 🎬 sYT
 
-> Search , Watch and Download YouTube videos from terminal without youtube API
+**Search • Watch • Download YouTube videos directly from the terminal**
 
-## Dependencies
+_No official YouTube API required._
 
--   python 3.5+ (For scrapping data)
--   ueberzug (For displaying images)
--   fzf or dmenu (For menu)
--   jq (For formatting json)
--   mpv (For playing video)
--   yt-dlp (For getting video qualities)
--   aria2c (For downloading videos)
+![Shell](https://img.shields.io/badge/interface-terminal-black)
+![Python](https://img.shields.io/badge/python-3.5+-blue?logo=python)
+![mpv](https://img.shields.io/badge/player-mpv-green)
+![yt--dlp](https://img.shields.io/badge/backend-yt--dlp-red)
 
-## Installation
+</div>
 
-#### Add Path
+---
 
-> Must add ~/.local/bin to your shell path
+## ✨ Overview
 
-Example how to add ~/.local/bin/ in the PATH Variable <br>
+`sYT` is a lightweight terminal-based YouTube client that lets you:
 
-<b>POSIX based shell (bash,zsh,dash,....) </b>
+- 🔎 Search videos
+- ▶️ Watch instantly
+- ⬇️ Download content
+- 🎛 Select quality interactively
 
-<em>Change bashrc to your repective shell's rc</em>
+All from your terminal — **without using the official YouTube API**.
 
+Designed for keyboard-driven workflows and minimal environments.
+
+---
+
+## 🚀 Features
+
+- API-free YouTube searching
+- Terminal-native UI (fzf / dmenu / bemenu)
+- Instant playback via `mpv`
+- Multi-video downloads
+- Quality selection
+- Thumbnail preview support
+- Multiple scraping algorithms
+
+---
+
+## 🧩 Dependencies
+
+| Tool                 | Purpose           |
+| -------------------- | ----------------- |
+| Python ≥ 3.5         | scraping logic    |
+| ueberzugpp           | image preview     |
+| fzf / dmenu / bemenu | interactive menu  |
+| jq                   | JSON formatting   |
+| mpv                  | video playback    |
+| yt-dlp               | stream extraction |
+| aria2c               | downloading       |
+
+---
+
+## 📦 Installation
+
+### 1️⃣ Add local bin to PATH
+
+#### POSIX shells (bash / zsh / dash)
+
+```bash
+echo 'export PATH=$HOME/.local/bin:$PATH' >> ~/.bashrc
 ```
-echo 'export PATH=~/.local/bin:$PATH' >> $HOME/.bashrc
+
+#### Fish shell
+
+```fish
+echo 'set PATH ~/.local/bin $PATH' >> ~/.config/fish/config.fish
 ```
 
-<b>Fish shell </b>
+Restart shell afterwards.
 
-```
-echo 'set PATH ~/.local/bin/ $PATH' >> $HOME/.config/fish/config.fish
-```
+---
 
-### Ueberzugpp installation guide
+### 2️⃣ Install `ueberzugpp`
 
-**Install Build Dependencies**
+Install build dependencies:
 
-```sh
+```bash
 libxres openslide cmake chafa libvips libsixel python-opencv
 ```
 
-**Start Build**
+Build:
 
-After building you will see a binary called `ueberzugpp` in your build directory
-
-```sh
+```bash
 pip uninstall -y cmake
-git clone "https://github.com/jstkdng/ueberzugpp.git"
+git clone https://github.com/jstkdng/ueberzugpp.git
 cd ueberzugpp
 mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -58,70 +96,126 @@ cmake --build .
 mv ./ueberzug ./ueberzugpp
 ```
 
-#### Install script
+---
 
-```sh
+### 3️⃣ Install sYT
 
-# INSTALL SCRIPT
+```bash
 git clone https://github.com/glowfi/sYT
 cd sYT
+
 mkdir -p ~/.local/bin
-cp -r ./sYT.py ~/.local/bin/
-cp -r ./sYT.sh ~/.local/bin/
-cd ..
-rm -rf sYT
+cp sYT.py ~/.local/bin/
+cp sYT.sh ~/.local/bin/
+
 chmod +x ~/.local/bin/sYT.py
 chmod +x ~/.local/bin/sYT.sh
 
+cd ..
+rm -rf sYT
 ```
 
-## How to Use
+---
 
-```sh
+## 🧠 Algorithms
 
-### Algorithms
-+ algov1 -> No dependencies pure web scraping and uses only inbuilt python libraries (slow)
-+ algov2 -> Uses invidious youtube api (fast) (default)
+| Algorithm | Description                                 |
+| --------- | ------------------------------------------- |
+| `v1`      | Pure web scraping (no dependencies, slower) |
+| `v2`      | Invidious API backend (fast, default)       |
 
-### ONLY WATCH VIDEOS
-Example 1: sYT.sh -p "fzf"       [Watch videos with fzf as provider]
-Example 2: sYT.sh -p "dmenu"     [Watch videos with dmenu as provider]
-Example 3: sYT.sh -p "bemenu"     [Watch videos with bemenu as provider]
+---
 
-### USING SPECIFIC ALGOS
-Example 1: sYT.sh -a "v1"       [Use algov1]
-Example 2: sYT.sh -a "v2"    [Use algov2]
+## ▶️ Usage
 
+### Watch Videos
 
-#### DOWNLOAD BY SEARCHING VIDEOS
-Note : For downloading -d flag must be given as true for downloading searched videos.
-
--p    | --provider      fzf or dmenu or bemenu
--d    | --download      Download searched video (true or false) [Only download do not play the video]
--ml   | --multilink     Download multiple youtube videos fzf as provider.
-
-Example 1: sYT.sh -d  "true" -p "fzf"            [Download single searched videos with fzf as provider]
-Example 2: sYT.sh -d  "true" -p "fzf" -ml "true" [Download multiple searched videos with fzf as provider]
-
-
-#### DOWNLOAD BY PASSING LINKS AS ARGUMENTS
-Note : For downloading videos directly by passing link as arguments.
-
--dl   | --dlink         Download any youtube video with a single link dmenu or bemenu as provider.
--fl   | --flink         Download any youtube video with a single link fzf as provider.
--flm  | --flinkmulti    Download any youtube video with multiple link fzf as provider.
--mav  | --mergeaudvid   Merge audio and video with fzf as provider.
-
-Example 1: sYT.sh -fl  "https://youtube.com/abcdef" -p "fzf" [Pass the link as argument if u want to uses fzf]
-
-Example 2: sYT.sh -flm "https://youtube.com/abc https://youtube.com/345" -p "fzf" [Pass multi link as argument if u want to uses fzf]
-
-Note :  dmenu or bemenu will ask you to paste the link in the prompt.Pass true or false for dl
-
-Example 3: sYT.sh -p "dmenu" -dl "true" [dmenu and bemenu supports only single link]
-
-Example 4: sYT.sh -d "true" -mav "true"
-
--h   | --help          Prints help
-
+```bash
+sYT.sh -p fzf
+sYT.sh -p dmenu
+sYT.sh -p bemenu
 ```
+
+---
+
+### Select Algorithm
+
+```bash
+sYT.sh -a v1
+sYT.sh -a v2
+```
+
+---
+
+### Download via Search
+
+```bash
+sYT.sh -d true -p fzf
+sYT.sh -d true -p fzf -ml true
+```
+
+Options:
+
+| Flag  | Description              |
+| ----- | ------------------------ |
+| `-p`  | menu provider            |
+| `-d`  | download instead of play |
+| `-ml` | multi-download           |
+
+---
+
+### Download via Direct Links
+
+Single link:
+
+```bash
+sYT.sh -fl "https://youtube.com/abcdef" -p fzf
+```
+
+Multiple links:
+
+```bash
+sYT.sh -flm "url1 url2" -p fzf
+```
+
+dmenu / bemenu prompt mode:
+
+```bash
+sYT.sh -p dmenu -dl true
+```
+
+Merge audio + video:
+
+```bash
+sYT.sh -d true -mav true
+```
+
+---
+
+### Help
+
+```bash
+sYT.sh -h
+```
+
+---
+
+## ⚠️ Notes
+
+- Depends on YouTube frontend changes
+- Uses scraping + Invidious instances
+- Respect YouTube terms of service
+
+---
+
+## 🤝 Contributing
+
+Improvements and fixes are welcome.
+
+Small focused PRs preferred.
+
+---
+
+## 📄 License
+
+GPL-3.0
