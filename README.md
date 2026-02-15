@@ -2,6 +2,8 @@
 
 # 🎬 sYT
 
+<img src="./demo.png" width="720"/>
+
 **Search • Watch • Download YouTube videos directly from the terminal**
 
 _No official YouTube API required._
